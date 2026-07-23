@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Tiny Break From Your Day</title>
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+background:linear-gradient(180deg,#0f172a,#111827,#020617);
+overflow:hidden;
+color:#f8fafc;
+}
+#bg span{
+position:absolute;
+width:3px;height:3px;border-radius:50%;
+background:white;
+opacity:.7;
+animation:float linear infinite;
+}
+@keyframes float{
+from{transform:translateY(105vh)}
+to{transform:translateY(-10vh)}
+}
+#progress{
+position:fixed;
+top:0;left:0;
+height:4px;
+background:#60a5fa;
+width:0%;
+transition:.4s;
+}
+.wrap{
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:20px;
+}
+.card{
+width:min(92vw,680px);
+background:rgba(31,41,55,.85);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.08);
+border-radius:22px;
+padding:28px;
+animation:show .45s ease;
+box-shadow:0 20px 60px rgba(0,0,0,.45);
+}
+@keyframes show{
+from{opacity:0;transform:translateY(18px) scale(.98)}
+to{opacity:1;transform:none}
+}
+button{
+margin-top:18px;
+padding:12px 22px;
+border:none;
+border-radius:12px;
+background:#3b82f6;
+color:white;
+font-size:16px;
+transition:.18s;
+}
+button:hover{transform:scale(1.03)}
+.option{display:block;width:100%;margin:10px 0;background:#374151}
+.linkish{text-decoration:underline;cursor:pointer}
+#modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.6);
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+#modal .box{
+background:#1f2937;
+border-radius:20px;
+padding:24px;
+max-width:420px;
+animation:show .3s;
+}
+#confetti{position:fixed;inset:0;pointer-events:none}
+.dot{
+position:absolute;
+width:8px;height:8px;border-radius:50%;
+animation:fall 2s linear forwards;
+}
+@keyframes fall{
+to{transform:translateY(110vh) rotate(540deg);opacity:0}
+}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="progress"></div>
+<div class="wrap">
+<div class="card">
+<div id="content"></div>
+<button id="next"></button>
+</div>
+</div>
+
+<div id="modal">
+<div class="box">
+<h3>🤫 Secret mil gaya.</h3>
+<p>Mujhe pehle se lag raha tha...</p>
+<p><b>Aap itni curious zaroor hongi. 😌</b></p>
+<p>Miss toh kar raha hoon aapko... bas style se bol raha tha. 😂</p>
+<button onclick="closeModal()">Ek aur secret?</button>
+</div>
+</div>
+
+<div id="confetti"></div>
+
+<script>
+for(let i=0;i<90;i++){
+let s=document.createElement('span');
+s.style.left=Math.random()*100+'vw';
+s.style.animationDuration=(8+Math.random()*12)+'s';
+s.style.animationDelay=(-Math.random()*20)+'s';
+document.getElementById('bg').appendChild(s);
+}
+const screens=[
+{b:"Open",t:`<h2>Hi.</h2><p>Aapko disturb karne ka ek slightly creative tareeka mil gaya. 😌</p><p>Normal message bhej deta...</p><p>Par usme maza kahan hai?</p>`},
+{b:"Toh kis liye hai?",t:`<p>Work trip update?</p><h3>Naaah.</h3><p>Wo toh aapko waise bhi pata hai. 😌</p><p>Ye page uske liye nahi hai.</p>`},
+{b:"Accha... aur?",t:`<p>Ek funny side effect hua hai...</p><p>Din mein kuch bhi interesting ho...</p><p>Automatically dimaag mein aata hai...</p><p><i>"Ye aapko batana hai."</i></p><p>Aur phir woh baat pending list mein add ho jaati hai...</p><p>Taaki raat ko aapko properly bata sakun. 😌</p>`},
+{quiz:true,b:"Next"},
+{b:"Continue",t:`<p><b>Waise...</b></p><p>Kal jo baat hui...</p><p>I'm actually glad hui.</p><p>Kabhi kabhi humein genuinely pata hi nahi hota ki saamne wale ko kis cheez se bura lag raha hota hai.</p><p>Ab lagta hai main aapke hints aur signs pehle se thoda better samajhne laga hoon.</p><p>(Although... abhi bhi kaafi long way to go hai. 😅)</p><p><b>But... I'm learning.</b></p><p>Aur honestly... mujhe ye learning continue rakhni hai.</p>`},
+{q2:true,b:"Last One"},
+{b:"Final",t:`<p>Waise...</p><p>Distance ek interesting cheez hai.</p><p>Location change kar deti hai...</p><p>Routine nahi.</p><p>Aur pata hai...</p><p>Aap abhi bhi us routine ka mera <span id="fav" class="linkish">favourite part</span> ho.</p>`},
+{final:true,b:"Done"}
+];
+let idx=0,favClicks=0;
+const c=document.getElementById("content"),n=document.getElementById("next");
+function render(){
+document.getElementById("progress").style.width=((idx)/(screens.length-1))*100+"%";
+let s=screens[idx];
+if(s.quiz){
+c.innerHTML=`<h3>Quick Quiz 😌</h3><p>"Aaj ek funny cheez hui..."</p>
+<button class=option>Kya hua?</button><button class=option>Batao.</button><button class=option>Phir?</button><button class=option>Jaldi bolo, suspense mat banao.</button><p id=r></p>`;
+document.querySelectorAll(".option").forEach(b=>b.onclick=()=>r.innerHTML="Honestly...<br>Mood pe depend karta hai.<br>Mujhe lagta hai aap ye chaaron bol sakti ho. 😂");
+}
+else if(s.q2){
+c.innerHTML=`<h3>Aapko kya lagta hai...</h3><p>Main is page pe itna time kyun spend kar raha hoon?</p>
+<button class=option>Kaam se bachne ke liye.</button>
+<button class=option>Mujhe coding pasand hai.</button>
+<button class=option>Dono.</button>
+<button class=option>Ek aur reason bhi hai.</button><p id=r></p>`;
+document.querySelectorAll(".option").forEach((b,i)=>b.onclick=()=>r.innerHTML=i==3?"Exactly. 😌<br>Bas mann kiya ki aap smile karo.":"Fair enough... valid answers. 😌<br>But ek aur option bhi tha...");
+}
+else if(s.final){
+c.innerHTML=`<h2>Bas.</h2><p>Itna hi.</p><p>Koi emotional speech nahi.</p><p>Bas ek chhota sa page...</p><p>Jo hopefully aapke face pe ek smile le aaya ho. 😌</p><p>Aur haan...</p><p>Next time jab milenge...</p><p>Is page ke marks zaroor dena.</p><p>Bas please HR wali rating mat dena. 😂</p>`;
+confetti();
+}
+else{
+c.innerHTML=s.t;
+setTimeout(()=>{
+let f=document.getElementById("fav");
+if(f){
+f.onclick=()=>{favClicks++; if(favClicks>=2)document.getElementById("modal").style.display="flex";}
+}
+},0);
+}
+n.textContent=s.b;
+}
+n.onclick=()=>{if(idx<screens.length-1){idx++;render();}};
+function closeModal(){
+document.getElementById("modal").style.display="none";
+alert("Nahi. 😌\n\nItna hi bonus content tha.\nAb next surprise ke liye wait karna padega. 😂");
+}
+function confetti(){
+let box=document.getElementById("confetti");
+for(let i=0;i<70;i++){
+let d=document.createElement("div");
+d.className="dot";
+d.style.left=Math.random()*100+"vw";
+d.style.top="-10px";
+d.style.background=`hsl(${Math.random()*360},90%,65%)`;
+box.appendChild(d);
+setTimeout(()=>d.remove(),2200);
+}
+}
+render();
+</script>
+</body>
+</html>
